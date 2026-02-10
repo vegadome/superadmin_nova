@@ -12,16 +12,37 @@ export const userService = {
   },
   // Récupérer les infirmiers en attente
   getPendingNurses: async () => {
-    const { data, error } = await supabase
+  console.log("Tentative de récupération des infirmiers...");
+  
+  const { data, error } = await supabase
     .from('profiles')
-    .select('id, full_name, inami_number, created_at, avatar_url, has_visa_permanent, visa_url, id_card_url')
+    .select('*') // On demande tout temporairement pour tester
     .eq('is_nurse', true)
-    .eq('verification_status', 'pending')
-    .order('created_at', { ascending: false });
+    .eq('verification_status', 'pending');
 
-    if (error) throw error;
-    return data;
-  },
+  if (error) {
+    console.error("ERREUR SUPABASE :", error.message);
+    throw error;
+  }
+
+  console.log("DONNÉES BRUTES REÇUES :", data);
+
+  if (!data || data.length === 0) {
+    console.warn("Aucun infirmier trouvé avec is_nurse=true et status=pending");
+    return [];
+  }
+
+  // Reconstruction des URLs pour le bucket 'inami-cards'
+  return data.map(nurse => {
+    if (nurse.inami_card_path) {
+      const { data: publicUrl } = supabase.storage
+        .from('inami-cards') 
+        .getPublicUrl(nurse.inami_card_path);
+      return { ...nurse, visa_url: publicUrl.publicUrl };
+    }
+    return nurse;
+  });
+},
 
   // Valider ou Rejeter un profil
   updateVerificationStatus: async (userId: string, status: 'verified' | 'rejected', feedback?: string) => {

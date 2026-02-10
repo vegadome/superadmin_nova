@@ -17,7 +17,7 @@ export default function UsersPage() {
         const data = await userService.getAllUsers();
         setUsers(data);
         setFilteredUsers(data);
-      } catch (err) { console.error(err); }
+      } catch (err) {}
       finally { setLoading(false); }
     };
     loadData();

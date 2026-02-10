@@ -38,7 +38,6 @@ export default function DashboardPage() {
         setStats(basicStats);
         setChartData(history);
       } catch (error) {
-        console.error("Erreur chargement dashboard:", error);
       } finally {
         setLoading(false);
       }

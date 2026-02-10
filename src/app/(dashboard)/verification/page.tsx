@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { userService } from '@/src/services/user.service';
 import { Check, X, Eye, Clock, FileText, ExternalLink, AlertCircle } from 'lucide-react';
+import { supabase } from '@/src/lib/supabase';
 
 export default function VerificationPage() {
   const [nurses, setNurses] = useState<any[]>([]);
@@ -12,12 +13,19 @@ export default function VerificationPage() {
   const [isRejecting, setIsRejecting] = useState(false);
 
   const loadNurses = async () => {
+    // On récupère la session actuelle
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    // Si pas de session, on ne cherche même pas
+    if (!session) return;
+
     setLoading(true);
     try {
       const data = await userService.getPendingNurses();
+      console.log("Données chargées dans le state:", data);
       setNurses(data);
     } catch (err) {
-      console.error(err);
+      console.error("Erreur chargement:", err);
     } finally {
       setLoading(false);
     }
@@ -125,21 +133,26 @@ export default function VerificationPage() {
               {/* Accès aux fichiers du Bucket */}
               <div className="space-y-3">
                 <label className="text-[10px] font-bold text-zinc-400 uppercase flex items-center gap-2">
-                  <FileText size={12}/> Documents INAMI / VISA
+                  <FileText size={12}/> Document de qualification
                 </label>
-                {selectedNurse.visa_url ? (
+                {(selectedNurse.visa_url || selectedNurse.inami_card_path) ? (
                   <a 
                     href={selectedNurse.visa_url} 
                     target="_blank" 
-                    className="flex items-center justify-between p-4 bg-zinc-50 border border-zinc-100 rounded-2xl group hover:border-indigo-200 transition-all"
+                    className="flex items-center justify-between p-4 bg-indigo-50 border border-indigo-100 rounded-2xl group hover:bg-indigo-100 transition-all"
                   >
-                    <span className="text-sm font-medium text-zinc-700">Consulter la carte INAMI / Visa</span>
-                    <ExternalLink size={16} className="text-zinc-400 group-hover:text-indigo-600" />
+                    <div className="flex items-center gap-3">
+                      <div className="bg-white p-2 rounded-lg shadow-sm">
+                        <FileText className="text-indigo-600" size={20} />
+                      </div>
+                      <span className="text-sm font-semibold text-indigo-900">Voir la carte INAMI / VISA</span>
+                    </div>
+                    <ExternalLink size={16} className="text-indigo-400 group-hover:text-indigo-600" />
                   </a>
                 ) : (
                   <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600">
                     <AlertCircle size={18} />
-                    <span className="text-sm font-medium">Aucun document n'a été téléversé.</span>
+                    <span className="text-sm font-medium">Aucun document téléversé.</span>
                   </div>
                 )}
               </div>
