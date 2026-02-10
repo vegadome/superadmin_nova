@@ -1,56 +1,52 @@
 import { supabase } from '@/src/lib/supabase';
 
 export const userService = {
-  getAllUsers: async () => {
+  getPendingNurses: async () => {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, full_name, role, is_nurse, facility_name, created_at, verification_status')
-      .order('created_at', { ascending: false });
+      .select('*')
+      .eq('is_nurse', true)
+      .eq('verification_status', 'pending');
 
     if (error) throw error;
-    return data;
+    if (!data) return [];
+
+    // On transforme chaque nurse pour récupérer des URLs valides
+    const nursesWithUrls = await Promise.all(data.map(async (nurse) => {
+      const transformed = { ...nurse };
+
+      // Fonction pour générer une URL signée
+      const generateSign = async (bucket: string, path: string | null) => {
+        if (!path) return null;
+        // On s'assure d'avoir un chemin propre (sans l'URL complète si elle y est)
+        const cleanPath = path.includes('http') ? path.split('/').slice(-2).join('/') : path;
+        
+        const { data: signedData } = await supabase.storage
+          .from(bucket)
+          .createSignedUrl(cleanPath, 3600); // Valide 1 heure
+          
+        return signedData?.signedUrl || null;
+      };
+
+      transformed.inami_url = await generateSign('inami-cards', nurse.inami_card_path);
+      transformed.id_card_url = await generateSign('identity-checks', nurse.id_card_path);
+      transformed.selfie_url = await generateSign('identity-checks', nurse.selfie_path);
+
+      return transformed;
+    }));
+
+    return nursesWithUrls;
   },
-  // Récupérer les infirmiers en attente
-  getPendingNurses: async () => {
-  console.log("Tentative de récupération des infirmiers...");
-  
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*') // On demande tout temporairement pour tester
-    .eq('is_nurse', true)
-    .eq('verification_status', 'pending');
 
-  if (error) {
-    console.error("ERREUR SUPABASE :", error.message);
-    throw error;
-  }
-
-  console.log("DONNÉES BRUTES REÇUES :", data);
-
-  if (!data || data.length === 0) {
-    console.warn("Aucun infirmier trouvé avec is_nurse=true et status=pending");
-    return [];
-  }
-
-  // Reconstruction des URLs pour le bucket 'inami-cards'
-  return data.map(nurse => {
-    if (nurse.inami_card_path) {
-      const { data: publicUrl } = supabase.storage
-        .from('inami-cards') 
-        .getPublicUrl(nurse.inami_card_path);
-      return { ...nurse, visa_url: publicUrl.publicUrl };
-    }
-    return nurse;
-  });
-},
-
-  // Valider ou Rejeter un profil
   updateVerificationStatus: async (userId: string, status: 'verified' | 'rejected', feedback?: string) => {
     const { error } = await supabase
       .from('profiles')
       .update({ 
         verification_status: status,
-        verification_feedback: feedback 
+        verification_feedback: feedback || null,
+        identity_verified: status === 'verified',
+        inami_verified: status === 'verified',
+        updated_at: new Date().toISOString()
       })
       .eq('id', userId);
 
