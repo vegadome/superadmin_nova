@@ -1,0 +1,62 @@
+{
+  "expo": {
+    "name": "VetoNova",
+    "slug": "vetonova",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "vetonova",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.marino.vetonova",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "VetoNova a besoin de votre position pour trouver des vétérinaires près de vous.",
+        "NSPhotoLibraryUsageDescription": "VetoNova a besoin d'accéder à votre bibliothèque de photos pour ajouter des images d'animaux.",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "vetonova"
+            ]
+          }
+        ]
+      }
+    },
+    "android": {
+      "package": "com.marino.vetonova",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.INTERNET"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "vetonova"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-image-picker",
+      "expo-location",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.marino.vetonova",
+          "enableGooglePay": true
+        }
+      ]
+    ]
+  }
+}

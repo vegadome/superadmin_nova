@@ -1,0 +1,119 @@
+## ✅ Ce qui est maintenant accompli (avec les nouveaux fichiers)
+
+### 🔐 Authentification & conformité
+- ✅ **Inscription/Login complète** (`LoginScreen.tsx`) :
+  - Authentification email/mot de passe pour infirmiers (`nurse`) et établissements (`facility`)
+  - Attribution automatique du rôle dans les metadata Supabase
+  - Interface adaptative selon le rôle (couleurs, textes)
+- ✅ **Onboarding professionnel complet** (`OnboardingNurseScreen.tsx`) :
+  - Processus en **4 étapes** avec barre de progression
+  - **Validation INAMI belge** (algorithme 11 chiffres avec checksum)
+  - Sélection des **spécialités** (urgences, gériatrie, domicile, réanimation, bloc opératoire)
+  - Capture photo **carte INAMI** via appareil photo (permissions gérées)
+  - Configuration **taux horaire B2B** et numéro TVA (validation format BE)
+  - Définition du **rayon d'intervention géographique**
+  - Upload sécurisé vers Supabase Storage (`inami-cards` bucket)
+  - Statut `inami_verified: false` par défaut (attente validation manuelle)
+
+### 👤 Profil professionnel
+- ✅ **Profil complet** (`ProfileScreen.tsx`) :
+  - Photo + badge professionnel
+  - Statistiques (missions, heures, gains)
+  - Gestion documents/paiements
+  - Mode carte activable
+- ✅ **Données professionnelles** collectées via onboarding :
+  - Spécialités, taux horaire, rayon d'intervention, numéro INAMI/TVA
+
+### 📍 Matching & missions
+- ✅ **Accueil intelligent** (`HomeIndex.tsx`) :
+  - Géolocalisation missions à proximité
+  - Filtres par catégorie (Hôpital, Domicile, MRS...)
+  - Postulation 1 clic avec feedback haptique
+- ✅ **Détails mission** (`FacilityDetailsScreen.tsx`) :
+  - Navigation GPS intégrée (iOS/Android)
+  - Calcul gains temps réel
+  - Statut postulation visible
+
+### ⏱️ Gestion de mission
+- ✅ **Accès sécurisé patients** (`PatientsScreen.tsx`) :
+  - Vérification stricte statut `accepted` avant accès
+  - Recherche patients par nom/NISS
+  - Check-out manuel avec confirmation
+- ✅ **Récapitulatif fin de mission** (`MissionSummaryScreen.tsx`) :
+  - Affichage gains/durée
+  - Message sécurité (révocation accès patients)
+
+### 💶 Paiements & revenus
+- ✅ **Historique consolidé** (`BookingsAllMission.tsx`) :
+  - Tri par statut (confirmées/en attente/archivées)
+  - Filtre mensuel (6 derniers mois)
+  - Calcul gains mensuels
+  - Export PDF simulé
+
+---
+
+## ⏳ Ce qui reste à faire (priorités)
+
+### 🔐 Authentification & conformité *(CRITIQUE - légal Belgique)*
+- ❌ **Validation INAMI côté serveur** : Vérification officielle auprès de l'INAMI (API ou validation manuelle admin)
+- ❌ **eID / carte d'identité** : Upload et vérification pièce d'identité
+- ❌ **e-signature** : Signature électronique des contrats/CGU
+- ❌ **RGPD granulaire** : Consentements spécifiques (marketing, partage données)
+- ❌ **Casier judiciaire** : Upload et vérification (optionnel premium)
+- ❌ **Workflow validation manuelle** : Interface admin pour valider les profils (`inami_verified: true`)
+
+### 👤 Profil professionnel
+- ❌ **Calendrier des disponibilités** : Interface pour définir créneaux libres/occupés
+- ❌ **Statut dynamique** : Basculer manuellement entre "disponible/occupé/offline"
+- ❌ **Édition photo de profil** : Modifier la photo après l'onboarding (galerie/appareil)
+
+### 📍 Matching & missions
+- ❌ **Push notifications temps réel** : Alertes nouvelles missions (expo-notifications + backend)
+- ❌ **Timeout d'acceptation** : Relance automatique si pas de réponse sous X minutes
+- ❌ **Re-matching automatique** : Redistribution si refus/timeout
+
+### ⏱️ Gestion de mission *(HAUTE PRIORITÉ - traçabilité)*
+- ❌ **Check-in géolocalisé** : Validation de présence sur site via géolocalisation
+- ❌ **Chronométrage automatique** : Démarrage/arrêt timer lié au check-in/out
+- ❌ **Notes de mission** : Saisie rapports (privés/partagés)
+- ❌ **Upload documents pendant mission** : Photos, formulaires à transmettre
+- ❌ **Signalement incident** : Workflow pour urgences/problèmes sur site
+
+### 💶 Paiements & revenus *(HAUTE PRIORITÉ - monétisation)*
+- ❌ **Configuration IBAN/TVA** : Formulaire sécurisé pour données bancaires
+- ❌ **Intégration Stripe/Adyen** : Paiements réels (pas seulement calculs)
+- ❌ **Factures légales** : Génération PDF conformes (numéro, TVA, mentions légales belges)
+- ❌ **Export comptable réel** : Formats spécifiques (CSV Excel avec colonnes comptables)
+
+### ⭐ Qualité & rétention
+- ❌ **Système de notation** : Évaluations bidirectionnelles (établissement ↔ infirmier)
+- ❌ **Feedback post-mission** : Formulaire structuré après chaque mission
+- ❌ **Badges de fiabilité** : Algorithmes de réputation ("Premium", "Fiable")
+- ❌ **Support in-app** : Chat ou tickets d'assistance intégrés
+
+### 🔔 Notifications système
+- ❌ **Push notifications** pour :
+  - Nouvelles missions correspondant aux critères
+  - Changements d'horaire par l'établissement
+  - Paiements effectués
+  - Messages des établissements
+
+---
+
+## 📊 Synthèse mise à jour
+
+| Catégorie | Avancement | Priorité restante |
+|-----------|------------|-------------------|
+| **UI/UX & Navigation** | ✅ 95% | Faible |
+| **Authentification** | ✅ 70% | **MOYENNE** (manque validation INAMI officielle) |
+| **Onboarding complet** | ✅ 90% | Faible |
+| **Matching basique** | ✅ 80% | Moyenne |
+| **Gestion mission** | ⚠️ 50% | **HAUTE** (manque check-in géolocalisé) |
+| **Paiements réels** | ⚠️ 30% | **HAUTE** (critique pour monétisation) |
+| **Conformité légale** | ⚠️ 40% | **CRITIQUE** (validation INAMI + RGPD) |
+
+💡 **Recommandations prioritaires** :
+1. 🔴 **Validation INAMI officielle** : Implémenter le workflow admin pour passer `inami_verified: true` après vérification humaine
+2. 🔴 **Check-in géolocalisé** : Obligatoire pour la traçabilité légale des missions
+3. 🟠 **Intégration Stripe** : Préparer la monétisation avec paiements réels
+4. 🟡 **Push notifications** : Améliorer l'engagement avec alertes temps réel
